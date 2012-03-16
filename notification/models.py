@@ -144,7 +144,7 @@ class Notice(models.Model):
     unseen = models.BooleanField(_("unseen"), default=True)
     archived = models.BooleanField(_("archived"), default=False)
     on_site = models.BooleanField(_("on site"))
-    url = models.URLFIeld(blank=True, null=True)
+    url = models.URLField(blank=True, null=True)
     
     objects = NoticeManager()
     
