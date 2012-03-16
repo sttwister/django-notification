@@ -144,6 +144,7 @@ class Notice(models.Model):
     unseen = models.BooleanField(_("unseen"), default=True)
     archived = models.BooleanField(_("archived"), default=False)
     on_site = models.BooleanField(_("on site"))
+    url = models.URLFIeld(blank=True, null=True)
     
     objects = NoticeManager()
     
@@ -320,8 +321,9 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
             "message": messages["full.txt"],
         }, context)
         
+        url = extra_context.get('url')
         notice = Notice.objects.create(recipient=user, message=messages["notice.html"],
-            notice_type=notice_type, on_site=on_site, sender=sender)
+            notice_type=notice_type, on_site=on_site, sender=sender, url=url)
         if should_send(user, notice_type, "1") and user.email and user.is_active: # Email
             recipients.append(user.email)
         send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, recipients)
