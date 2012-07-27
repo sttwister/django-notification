@@ -300,6 +300,8 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
             # activate the user's language
             activate(language)
         
+        url = extra_context.get('url')
+
         # update context with user specific translations
         context = Context({
             "recipient": user,
@@ -307,7 +309,7 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
             "notice": ugettext(notice_type.display),
             "notices_url": notices_url,
             "current_site": current_site,
-            "url": extra_context.get('url'),
+            "url": url,
         })
         context.update(extra_context)
         
@@ -317,18 +319,20 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         # Strip newlines from subject
         subject = "".join(render_to_string("notification/email_subject.txt", {
             "message": messages["short.txt"],
+            "url": url,
         }, context).splitlines())
         
         body = render_to_string("notification/email_body.txt", {
             "message": messages["full.txt"],
+            "url": url,
         }, context)
 
         if(messages['full.html']):
             html_body = render_to_string('notification/email_body.html', {
                 'message': messages['full.html'],
+                "url": url,
             }, context)
 
-        url = extra_context.get('url')
         notice = Notice.objects.create(recipient=user, message=messages['notice.html'],
             notice_type=notice_type, on_site=on_site, sender=sender, url=url)
 
