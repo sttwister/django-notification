@@ -321,7 +321,7 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
 
         from django.utils.hashcompat import sha_constructor
         context.update({
-                'security_hash': sha_constructor('%s:%d' % (notice.recipient.username, notice.id))
+                'security_hash': sha_constructor('%s:%d' % (notice.recipient.username, notice.id)).hexdigest()
         })
 
         # Strip newlines from subject
