@@ -316,6 +316,14 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         # get prerendered format messages
         messages = get_formatted_messages(formats, label, context)
         
+        notice = Notice.objects.create(recipient=user, message=messages['notice.html'],
+            notice_type=notice_type, on_site=on_site, sender=sender, url=url)
+
+        from django.utils.hashcompat import sha_constructor
+        context.update({
+                'security_hash': sha_constructor('%s:%d' % (notice.user.username, notice.id))
+        })
+
         # Strip newlines from subject
         subject = "".join(render_to_string("notification/email_subject.txt", {
             "message": messages["short.txt"],
@@ -332,9 +340,6 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
                 'message': messages['full.html'],
                 "url": url,
             }, context)
-
-        notice = Notice.objects.create(recipient=user, message=messages['notice.html'],
-            notice_type=notice_type, on_site=on_site, sender=sender, url=url)
 
         if should_send(user, notice_type, "1") and user.email and user.is_active: # Email
             recipients.append(user.email)
