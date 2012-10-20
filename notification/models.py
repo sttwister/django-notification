@@ -250,7 +250,7 @@ def get_formatted_messages(formats, label, context):
     return format_templates
 
 
-def send_now(users, label, extra_context=None, on_site=True, sender=None):
+def send_now(users, label, extra_context=None, on_site=True, sender=None, send_email=True):
     """
     Creates a new notice.
     
@@ -287,6 +287,8 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         "full.html",
     ) # TODO make formats configurable
     
+    notices = []
+
     for user in users:
         recipients = []
         # get user language for user from language store defined in
@@ -319,6 +321,8 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         notice = Notice.objects.create(recipient=user, message=messages['notice.html'],
             notice_type=notice_type, on_site=on_site, sender=sender, url=url)
 
+        notices.append((notice, context))
+
         from django.utils.hashcompat import sha_constructor
         context.update({
             'notice_id': notice.id,
@@ -345,13 +349,15 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         if should_send(user, notice_type, "1") and user.email and user.is_active: # Email
             recipients.append(user.email)
 
-        msg = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, recipients)
-        msg.attach_alternative(html_body, "text/html")
-        msg.send()
+        if send_email:
+            msg = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, recipients)
+            msg.attach_alternative(html_body, "text/html")
+            msg.send()
         #send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, recipients)
 
     # reset environment to original language
     activate(current_language)
+    return notices
 
 
 def send(*args, **kwargs):
