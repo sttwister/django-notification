@@ -312,6 +312,8 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None, send_e
             "notices_url": notices_url,
             "current_site": current_site,
             "url": url,
+            "STATIC_URL": settings.STATIC_URL,
+            "MEDIA_URL": settings.MEDIA_URL,
         })
         context.update(extra_context)
         
