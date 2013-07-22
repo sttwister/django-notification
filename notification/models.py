@@ -74,13 +74,12 @@ class NoticeSetting(models.Model):
 
 
 def get_notification_setting(user, notice_type, medium):
-    try:
-        return NoticeSetting.objects.get(user=user, notice_type=notice_type, medium=medium)
-    except NoticeSetting.DoesNotExist:
+    setting, created = NoticeSetting.objects.get_or_create(user=user, notice_type=notice_type, medium=medium)
+    if created:
         default = (NOTICE_MEDIA_DEFAULTS[medium] <= notice_type.default)
-        setting = NoticeSetting(user=user, notice_type=notice_type, medium=medium, send=default)
+        setting.send = default
         setting.save()
-        return setting
+    return setting
 
 
 def should_send(user, notice_type, medium):
